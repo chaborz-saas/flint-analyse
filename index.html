@@ -222,6 +222,13 @@
     <button class="btn ghost sm" onclick="loadDemo()">🎲 Charger un jeu de démo (21 jours)</button>
     <button class="btn ghost sm" style="margin-top:8px;color:var(--accent)" onclick="wipe()">🗑️ Vider FLINT Analyse</button>
   </div>
+
+  <div class="card">
+    <div class="ct">App</div>
+    <button class="btn ghost sm" onclick="forceUpdate()">🔄 Forcer la mise à jour</button>
+    <p class="sci" id="verLine" style="margin-top:6px"></p>
+    <p class="sci" style="margin-top:2px;color:var(--faint)">Ne touche pas à tes données importées.</p>
+  </div>
 </div></section>
 
 <nav>
@@ -431,11 +438,21 @@ function go(v){document.querySelectorAll('.view').forEach(s=>s.classList.remove(
 document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>go(b.dataset.v)));
 
 /* ===================== INIT ===================== */
+const APP_VERSION='analyse-v3';
 (function init(){
   const t=new Date();document.getElementById('mDate').value=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
   refreshAll();
+  const vl=document.getElementById('verLine');if(vl)vl.textContent='Version : '+APP_VERSION;
   if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
 })();
+async function forceUpdate(){
+  toast('Mise à jour…');
+  try{
+    if('serviceWorker' in navigator){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()));}
+    if(window.caches){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));}
+  }catch(e){}
+  location.reload(true);
+}
 </script>
 </body>
 </html>
