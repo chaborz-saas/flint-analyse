@@ -82,6 +82,13 @@
   .toast{position:fixed;left:50%;top:14px;transform:translateX(-50%) translateY(-14px) scale(.96);background:var(--ink);color:#fff;padding:12px 20px;border-radius:30px;font-weight:700;font-size:14px;box-shadow:0 12px 30px rgba(20,18,12,.3);z-index:60;opacity:0;transition:.35s cubic-bezier(.3,1.3,.5,1);pointer-events:none;max-width:88vw;text-align:center}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(6px) scale(1)}
   .note{font-size:12px;color:var(--ink2);background:var(--bg2);border-radius:12px;padding:10px 12px;line-height:1.5}
+  details.guide summary{font-size:11px;font-weight:800;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;cursor:pointer;list-style:none}
+  details.guide summary::-webkit-details-marker{display:none}
+  details.guide[open] summary{margin-bottom:12px}
+  .gstep{font-weight:800;font-size:13px;margin:14px 0 4px}
+  .gstep .gt{font-size:10px;font-weight:700;color:var(--faint);text-transform:none;letter-spacing:0}
+  details.guide ol{margin:0;padding-left:18px;font-size:12.5px;color:var(--ink2);line-height:1.75}
+  details.guide ol b{color:var(--ink)}
   .file{position:relative;overflow:hidden;display:inline-block;width:100%}
   .file input[type=file]{position:absolute;left:0;top:0;opacity:0;width:100%;height:100%;cursor:pointer}
 </style>
@@ -146,6 +153,27 @@
 <!-- ============ DONNÉES ============ -->
 <section class="view" id="v-data"><div class="wrap">
   <div class="pgtitle">DONNÉES</div>
+
+  <details class="card guide" open>
+    <summary>📖 Guide — remplir les 3 flux</summary>
+    <div class="gstep">🔵 Polar → flux 1 <span class="gt">(tout sur ce téléphone)</span></div>
+    <ol>
+      <li>App <b>Polar Flow</b> → autorise <b>Health Connect</b> (écriture).</li>
+      <li>App <b>FLINT</b> → Profil → <b>Synchroniser mon capteur</b>.</li>
+      <li>Après ~4 nuits : FLINT → Profil → <b>Exporter</b> (copie).</li>
+      <li>Ici → <b>Importer Polar</b> → colle → Importer.</li>
+    </ol>
+    <div class="gstep">🟢 Whoop → flux 2 + 3 <span class="gt">(via un ordi)</span></div>
+    <ol>
+      <li>Ordi : crée une app sur <b>developer.whoop.com</b>, remplis <code>whoop-config.json</code>.</li>
+      <li><code>node whoop-sync.mjs login</code> puis <code>pull 30</code> → <code>whoop-data.json</code>.</li>
+      <li>Envoie le fichier sur ton tél (Drive / mail).</li>
+      <li>Ici → <b>Importer whoop-data.json</b> <span class="gt">(remplit F2 et F3 d'un coup)</span>.</li>
+    </ol>
+    <div class="gstep">✋ Manuel <span class="gt">(dépannage)</span></div>
+    <ol><li>Saisie ci-dessous → choisis la <b>source</b> (Polar/Whoop) + tape la nuit.</li></ol>
+    <div class="note" style="margin-top:12px">⚠️ Importe <b>sur ce téléphone</b> (données stockées sur l'appareil) · il faut <b>~4 nuits par source</b> avant qu'un score s'affiche.</div>
+  </details>
 
   <div class="card">
     <div class="ct">État des sources</div>
