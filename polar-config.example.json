@@ -1,0 +1,6 @@
+{
+  "client_id": "TON_CLIENT_ID_POLAR",
+  "client_secret": "TON_CLIENT_SECRET_POLAR",
+  "redirect_uri": "http://localhost:8788/callback",
+  "member_id": "flint-analyse-user"
+}

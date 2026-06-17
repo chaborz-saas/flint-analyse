@@ -156,12 +156,12 @@
 
   <details class="card guide" open>
     <summary>📖 Guide — remplir les 3 flux</summary>
-    <div class="gstep">🔵 Polar → flux 1 <span class="gt">(tout sur ce téléphone)</span></div>
+    <div class="gstep">🔵 Polar → flux 1 <span class="gt">(via un ordi, API Polar)</span></div>
     <ol>
-      <li>App <b>Polar Flow</b> → autorise <b>Health Connect</b> (écriture).</li>
-      <li>App <b>FLINT</b> → Profil → <b>Synchroniser mon capteur</b>.</li>
-      <li>Après ~4 nuits : FLINT → Profil → <b>Exporter</b> (copie).</li>
-      <li>Ici → <b>Importer Polar</b> → colle → Importer.</li>
+      <li><b>Polar Flow</b> installé + Loop appairée (elle sync au cloud Polar).</li>
+      <li>Ordi : crée une app sur <b>admin.polaraccesslink.com</b>, remplis <code>polar-config.json</code>.</li>
+      <li><code>node polar-sync.mjs login</code> puis <code>pull</code> → <code>polar-data.json</code>.</li>
+      <li>Envoie le fichier sur ton tél → ici → <b>Importer Polar</b> (fichier).</li>
     </ol>
     <div class="gstep">🟢 Whoop → flux 2 + 3 <span class="gt">(via un ordi)</span></div>
     <ol>
@@ -438,7 +438,7 @@ function go(v){document.querySelectorAll('.view').forEach(s=>s.classList.remove(
 document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>go(b.dataset.v)));
 
 /* ===================== INIT ===================== */
-const APP_VERSION='analyse-v3';
+const APP_VERSION='analyse-v4';
 (function init(){
   const t=new Date();document.getElementById('mDate').value=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
   refreshAll();

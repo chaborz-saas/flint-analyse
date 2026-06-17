@@ -45,10 +45,25 @@ Onglet **Données → 🎲 Charger un jeu de démo** pour voir le comparateur fo
    ```
 4. Dans l'app : **Données → Importer whoop-data.json**.
 
-## Récupérer les données Polar (côté F1)
+## Récupérer les données Polar (côté F1) — API officielle
 
-Dans l'app **FLINT de base** : Profil → « Exporter mes données » (copie le presse-papier).
-Colle ce JSON dans l'onglet **Données → Importer Polar** de FLINT Analyse.
+La Polar Loop est un appareil **fermé** : impossible de la connecter directement à une app, elle ne s'appaire qu'à Polar Flow. On récupère donc ses données depuis le **cloud Polar (AccessLink API)** — ça donne la **HRV** (que Health Connect n'exporte pas).
+
+1. **Crée une app** sur https://admin.polaraccesslink.com (gratuit, perso ≤ 20 users).
+   - Redirect URI : `http://localhost:8788/callback`
+2. Configure :
+   ```bash
+   cp polar-config.example.json polar-config.json
+   # remplis client_id / client_secret
+   ```
+3. Autorise puis tire les données (Polar Flow doit avoir synchronisé la Loop) :
+   ```bash
+   node polar-sync.mjs login    # autorise + enregistre l'utilisateur
+   node polar-sync.mjs pull     # écrit polar-data.json
+   ```
+4. Dans l'app : **Données → Importer Polar** (fichier `polar-data.json`).
+
+> Données récupérées : HRV (Nightly Recharge), FC nocturne, respiration, sommeil + stades.
 
 ## Calibrer
 
