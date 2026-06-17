@@ -1,0 +1,5 @@
+{
+  "client_id": "TON_CLIENT_ID_WHOOP",
+  "client_secret": "TON_CLIENT_SECRET_WHOOP",
+  "redirect_uri": "http://localhost:8787/callback"
+}

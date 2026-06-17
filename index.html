@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F3EFE7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Analyse">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>FLINT Analyse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3EFE7; --bg2:#EBE6DC; --card:#FFFFFF;
+    --ink:#15140F; --ink2:#6E6A62; --faint:#A7A29A;
+    --accent:#F0492E; --accentL:#FF6A48;
+    --polar:#1E6FD6; --whoop:#11B886; --ref:#15140F;
+    --track:#ECE7DD; --line:rgba(20,18,12,.08);
+    --green:#3FB57A; --amber:#F2A93B;
+    --shadow:0 10px 34px rgba(20,18,12,.05),0 2px 6px rgba(20,18,12,.03);
+    --r:22px; --disp:'Anton',-apple-system,sans-serif; --sans:'Inter',-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg)}
+  body{color:var(--ink);font-family:var(--sans);padding-bottom:92px;-webkit-font-smoothing:antialiased;
+    background:radial-gradient(120% 60% at 50% -10%, #FBF8F2, transparent 60%), var(--bg)}
+  .num{font-variant-numeric:tabular-nums}
+  header{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+    padding:16px 18px 12px;background:linear-gradient(180deg,var(--bg) 70%,transparent)}
+  header .br{font-family:var(--disp);font-size:22px;letter-spacing:.02em}
+  header .br small{color:var(--accent)}
+  header .tag{font-size:10px;font-weight:800;color:var(--faint);letter-spacing:.14em;text-transform:uppercase}
+  .wrap{max-width:620px;margin:0 auto;padding:2px 17px 0}
+  .view{display:none}.view.on{display:block;animation:vin .3s cubic-bezier(.2,.8,.2,1)}
+  @keyframes vin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .pgtitle{font-family:var(--disp);font-size:36px;text-align:center;margin:2px 0 12px}
+  .card{background:var(--card);border-radius:var(--r);padding:18px;margin-bottom:13px;box-shadow:var(--shadow)}
+  .ct{font-size:11px;font-weight:800;color:var(--faint);letter-spacing:.14em;text-transform:uppercase;margin:0 0 12px}
+  .sci{font-size:13px;color:var(--ink2);line-height:1.5}
+  .lab{font-size:10px;font-weight:800;color:var(--faint);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
+  .fin{width:100%;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:12px;padding:11px;font-size:15px;font-weight:600;font-family:inherit}
+  .fin:focus{outline:none;border-color:var(--accent)}
+  select.fin{appearance:none}
+  .btn{display:block;width:100%;border:0;border-radius:13px;min-height:48px;font-family:var(--sans);font-weight:800;font-size:14px;cursor:pointer;
+    background:linear-gradient(180deg,var(--accentL),var(--accent));color:#fff;box-shadow:0 10px 24px rgba(240,73,46,.22);transition:transform .12s}
+  .btn:active{transform:scale(.98)}
+  .btn.ghost{background:var(--bg2);color:var(--ink);box-shadow:none}
+  .btn.sm{min-height:42px;font-size:13px;border-radius:11px}
+  .stat{background:var(--bg2);border-radius:16px;padding:13px}
+  .stat .sl{font-size:9.5px;font-weight:800;color:var(--faint);text-transform:uppercase;letter-spacing:.08em;line-height:1.2}
+  .stat .sv{font-family:var(--disp);font-size:30px;margin-top:4px;line-height:1}
+  .stat .ss{font-size:11px;color:var(--ink2);margin-top:3px;font-weight:600}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;padding:5px 10px;border-radius:20px;background:var(--bg2);color:var(--ink2)}
+  .dot{width:9px;height:9px;border-radius:50%;flex:none}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px}
+  .legend .li{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--ink2)}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{padding:8px 6px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+  th:first-child,td:first-child{text-align:left}
+  th{font-size:9.5px;font-weight:800;color:var(--faint);text-transform:uppercase;letter-spacing:.05em}
+  .src{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+  .row{display:flex;align-items:center;gap:8px}
+  .slrow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .slrow:last-child{border-bottom:0}
+  .slrow .sn{font-weight:800;font-size:13px;flex:1}
+  .slrow input[type=range]{flex:1;accent-color:var(--accent)}
+  .slrow .sv2{font-family:var(--disp);font-size:18px;min-width:46px;text-align:right}
+  .del{color:var(--faint);cursor:pointer;font-weight:800;padding:2px 6px}
+  nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;padding:8px 2px calc(8px + env(safe-area-inset-bottom));
+    background:rgba(243,239,231,.94);backdrop-filter:blur(18px);border-top:1px solid var(--line)}
+  nav button{flex:1;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 1px;min-height:52px;cursor:pointer;color:var(--faint);font-size:10px;font-weight:800;font-family:inherit}
+  nav .ic{width:22px;height:22px}
+  nav button.on{color:var(--accent)}
+  .toast{position:fixed;left:50%;top:14px;transform:translateX(-50%) translateY(-14px) scale(.96);background:var(--ink);color:#fff;padding:12px 20px;border-radius:30px;font-weight:700;font-size:14px;box-shadow:0 12px 30px rgba(20,18,12,.3);z-index:60;opacity:0;transition:.35s cubic-bezier(.3,1.3,.5,1);pointer-events:none;max-width:88vw;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(6px) scale(1)}
+  .note{font-size:12px;color:var(--ink2);background:var(--bg2);border-radius:12px;padding:10px 12px;line-height:1.5}
+  .file{position:relative;overflow:hidden;display:inline-block;width:100%}
+  .file input[type=file]{position:absolute;left:0;top:0;opacity:0;width:100%;height:100%;cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <div class="br">FLINT <small>ANALYSE</small></div>
+  <div class="tag">Comparateur · v1</div>
+</header>
+
+<!-- ============ COMPARATEUR ============ -->
+<section class="view on" id="v-comp"><div class="wrap">
+  <div class="pgtitle">COMPARATEUR</div>
+  <div class="card">
+    <div class="ct">Score Récupération · 3 flux</div>
+    <div id="chart"></div>
+    <div class="legend">
+      <div class="li"><span class="dot" style="background:var(--polar)"></span>FLINT · Polar (flux 1)</div>
+      <div class="li"><span class="dot" style="background:var(--whoop)"></span>FLINT · Whoop (flux 2)</div>
+      <div class="li"><span class="dot" style="background:var(--ref)"></span>Whoop officiel (flux 3)</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">Décomposition de l'écart</div>
+    <div class="grid3">
+      <div class="stat"><div class="sl">Fidélité algo<br>(F2 vs F3 · même capteur)</div><div class="sv" id="rAlgo">—</div><div class="ss" id="mAlgo"></div></div>
+      <div class="stat"><div class="sl">Écart capteur<br>(F1 vs F2 · même algo)</div><div class="sv" id="rSensor">—</div><div class="ss" id="mSensor"></div></div>
+      <div class="stat"><div class="sl">Bout-en-bout<br>(F1 vs F3)</div><div class="sv" id="rE2E">—</div><div class="ss" id="mE2E"></div></div>
+    </div>
+    <div class="note" style="margin-top:12px" id="interp"></div>
+  </div>
+  <div class="card">
+    <div class="ct">HRV brut · capteurs</div>
+    <div class="grid2">
+      <div class="stat"><div class="sl">Corrélation HRV<br>Polar vs Whoop</div><div class="sv" id="rHrv">—</div><div class="ss" id="mHrv"></div></div>
+      <div class="stat"><div class="sl">Jours comparables</div><div class="sv" id="nDays">—</div><div class="ss">nuits avec les 2 sources</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">Détail par jour</div>
+    <div style="overflow:auto"><table id="tbl"></table></div>
+    <button class="btn ghost sm" style="margin-top:12px" onclick="exportCSV()">📤 Exporter en CSV</button>
+  </div>
+</div></section>
+
+<!-- ============ CALIBRATION ============ -->
+<section class="view" id="v-calib"><div class="wrap">
+  <div class="pgtitle">CALIBRATION</div>
+  <div class="card">
+    <div class="ct">Poids de l'algo Récupération</div>
+    <div class="sci" style="margin-bottom:8px">Ajuste pour rapprocher <b style="color:var(--whoop)">FLINT·Whoop</b> du <b>Whoop officiel</b> (même capteur → tu cales l'algo). Ces poids s'appliquent aux 2 flux FLINT à l'identique.</div>
+    <div id="sliders"></div>
+    <div class="grid2" style="margin-top:14px">
+      <div class="stat"><div class="sl">Fidélité algo (r)</div><div class="sv" id="cR">—</div><div class="ss">F2 vs Whoop officiel</div></div>
+      <div class="stat"><div class="sl">Erreur moyenne</div><div class="sv" id="cM">—</div><div class="ss">points d'écart (MAE)</div></div>
+    </div>
+    <button class="btn ghost sm" style="margin-top:12px" onclick="resetWeights()">↺ Valeurs FLINT de base (0.55 / 0.22 / 0.18 / 0.10)</button>
+    <div class="note" style="margin-top:12px">Quand tu es satisfait, transmets ces poids à Dino pour l'app de base. La formule : <code>Z = wHRV·z(HRV) − wRHR·z(FCrepos) + wSleep·z(sommeil) − wResp·z(resp)</code>, puis <code>score = sigmoïde(k·Z)</code>.</div>
+  </div>
+</div></section>
+
+<!-- ============ DONNÉES ============ -->
+<section class="view" id="v-data"><div class="wrap">
+  <div class="pgtitle">DONNÉES</div>
+
+  <div class="card">
+    <div class="ct">État des sources</div>
+    <div class="grid3">
+      <div class="stat"><div class="sl"><span class="src" style="background:var(--polar)"></span>Polar</div><div class="sv" id="cntPolar">0</div><div class="ss">nuits</div></div>
+      <div class="stat"><div class="sl"><span class="src" style="background:var(--whoop)"></span>Whoop</div><div class="sv" id="cntWhoop">0</div><div class="ss">nuits</div></div>
+      <div class="stat"><div class="sl"><span class="src" style="background:var(--ref)"></span>Whoop off.</div><div class="sv" id="cntRef">0</div><div class="ss">scores</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">Importer Whoop (via whoop-sync.mjs)</div>
+    <div class="sci" style="margin-bottom:10px">Le script Node récupère tes données Whoop par l'API officielle et écrit <code>whoop-data.json</code>. Importe-le ici (voir README).</div>
+    <div class="file"><button class="btn sm">📥 Importer whoop-data.json</button><input type="file" accept=".json,application/json" onchange="importWhoop(this)"></div>
+  </div>
+
+  <div class="card">
+    <div class="ct">Importer Polar (export de FLINT)</div>
+    <div class="sci" style="margin-bottom:10px">Dans l'app FLINT de base : Profil → « Exporter mes données » (copie le presse-papier). Colle le JSON dans un fichier <code>.json</code> et importe-le, ou colle-le directement ci-dessous.</div>
+    <div class="file" style="margin-bottom:8px"><button class="btn sm">📥 Importer un fichier d'export</button><input type="file" accept=".json,application/json" onchange="importPolarFile(this)"></div>
+    <textarea id="pasteBox" class="fin" rows="3" placeholder="…ou colle ici le JSON exporté de FLINT"></textarea>
+    <button class="btn ghost sm" style="margin-top:8px" onclick="importPolarPaste()">Importer le texte collé</button>
+  </div>
+
+  <div class="card">
+    <div class="ct">Saisie manuelle d'une nuit</div>
+    <div class="grid2" style="margin-bottom:8px">
+      <div><div class="lab">Date</div><input id="mDate" class="fin" type="date"></div>
+      <div><div class="lab">Source</div><select id="mSrc" class="fin" onchange="toggleOff()"><option value="polar">Polar</option><option value="whoop">Whoop</option></select></div>
+    </div>
+    <div class="grid4">
+      <div><div class="lab">HRV ms</div><input id="mHrvIn" class="fin" type="number" inputmode="decimal"></div>
+      <div><div class="lab">FC repos</div><input id="mRhr" class="fin" type="number" inputmode="numeric"></div>
+      <div><div class="lab">Resp</div><input id="mResp" class="fin" type="number" inputmode="decimal"></div>
+      <div><div class="lab">Sommeil h</div><input id="mSleep" class="fin" type="number" inputmode="decimal" step="0.1"></div>
+    </div>
+    <div id="offBox" class="grid2" style="margin-top:8px;display:none">
+      <div><div class="lab">Recovery Whoop officiel</div><input id="mOffRec" class="fin" type="number" inputmode="numeric"></div>
+      <div><div class="lab">Strain Whoop (opt.)</div><input id="mOffStr" class="fin" type="number" inputmode="decimal"></div>
+    </div>
+    <button class="btn ghost sm" style="margin-top:10px" onclick="saveManual()">💾 Enregistrer la nuit</button>
+  </div>
+
+  <div class="card">
+    <div class="ct">Bac à sable</div>
+    <button class="btn ghost sm" onclick="loadDemo()">🎲 Charger un jeu de démo (21 jours)</button>
+    <button class="btn ghost sm" style="margin-top:8px;color:var(--accent)" onclick="wipe()">🗑️ Vider FLINT Analyse</button>
+  </div>
+</div></section>
+
+<nav>
+  <button data-v="comp" class="on"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Comparateur</button>
+  <button data-v="calib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h7M15 18h5"/><circle cx="16" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="13" cy="18" r="2"/></svg>Calibration</button>
+  <button data-v="data"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>Données</button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== STORAGE ===================== */
+const LS=localStorage;
+function jget(k,d){try{const v=LS.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}}
+function jset(k,v){LS.setItem(k,JSON.stringify(v))}
+let toastT;function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('show'),2200)}
+function norm(s){const m=String(s).split('-');if(m.length<3)return s;return m[0]+'-'+String(+m[1]).padStart(2,'0')+'-'+String(+m[2]).padStart(2,'0')}
+
+const DEF_W={wHRV:0.55,wRHR:0.22,wSleep:0.18,wResp:0.10,k:1.05,need:8};
+function W(){return Object.assign({},DEF_W,jget('fa_weights',{}))}
+
+/* ===================== ALGO (identique à FLINT de base) ===================== */
+function daysOf(src){const out={};const pre='fa_'+src+'_';for(let i=0;i<LS.length;i++){const k=LS.key(i);if(k.startsWith(pre))out[k.slice(pre.length)]=jget(k,null)}return out}
+function baseStatAt(map,field,date){
+  const ds=Object.keys(map).filter(d=>d<date).sort().slice(-30);
+  const a=[];ds.forEach(d=>{const v=map[d]&&map[d][field];if(v!=null)a.push(v)});
+  if(a.length<3)return null;
+  const m=a.reduce((x,y)=>x+y,0)/a.length;
+  const sd=Math.sqrt(a.reduce((x,y)=>x+(y-m)*(y-m),0)/a.length)||1;
+  return {m,sd,n:a.length};
+}
+function recoveryAt(map,date){
+  const t=map[date];if(!t||t.hrv==null)return null;
+  const bH=baseStatAt(map,'hrv',date);if(!bH)return null;
+  const bR=baseStatAt(map,'rhr',date),bP=baseStatAt(map,'resp',date),w=W();
+  const z=(v,b)=>(b&&v!=null)?(v-b.m)/b.sd:0;
+  const zH=z(t.hrv,bH),zR=z(t.rhr,bR),zP=z(t.resp,bP);
+  const need=(w.need||8)*60;
+  const sp=t.sleepMin!=null?t.sleepMin/need:0.85;
+  const zS=Math.max(-2,Math.min(1.5,(sp-1)*3));
+  const pR=Math.max(0,zP);
+  const Z=w.wHRV*zH-w.wRHR*zR+w.wSleep*zS-w.wResp*pR;
+  return Math.max(1,Math.min(100,Math.round(100/(1+Math.exp(-w.k*Z)))));
+}
+
+/* ===================== STATS ===================== */
+function pearson(pairs){
+  const n=pairs.length;if(n<3)return null;
+  let sx=0,sy=0,sxy=0,sx2=0,sy2=0;
+  pairs.forEach(([x,y])=>{sx+=x;sy+=y;sxy+=x*y;sx2+=x*x;sy2+=y*y});
+  const num=n*sxy-sx*sy, den=Math.sqrt((n*sx2-sx*sx)*(n*sy2-sy*sy));
+  return den===0?null:num/den;
+}
+function mae(pairs){if(!pairs.length)return null;return pairs.reduce((a,[x,y])=>a+Math.abs(x-y),0)/pairs.length}
+function fmtR(r){return r==null?'—':r.toFixed(2)}
+function fmtM(m){return m==null?'':('MAE '+m.toFixed(1))}
+
+/* ===================== BUILD COMPARISON ===================== */
+function buildSeries(){
+  const polar=daysOf('polar'), whoop=daysOf('whoop');
+  const dates=Array.from(new Set([...Object.keys(polar),...Object.keys(whoop)])).sort();
+  return dates.map(d=>({
+    date:d,
+    f1:recoveryAt(polar,d),
+    f2:recoveryAt(whoop,d),
+    f3:(whoop[d]&&whoop[d].offRecovery!=null)?whoop[d].offRecovery:null,
+    hrvP:polar[d]?polar[d].hrv:null,
+    hrvW:whoop[d]?whoop[d].hrv:null
+  }));
+}
+function pairsOf(rows,a,b){return rows.filter(r=>r[a]!=null&&r[b]!=null).map(r=>[r[a],r[b]])}
+
+/* ===================== CHART ===================== */
+function chart(rows){
+  const W2=580,H=200,padL=30,padB=22,padT=12,padR=8;
+  if(rows.length<2)return '<div class="sci">Pas assez de données. Charge un jeu de démo dans l\'onglet Données, ou importe tes nuits.</div>';
+  const iw=W2-padL-padR, ih=H-padT-padB, n=rows.length;
+  const X=i=>padL+(n===1?iw/2:iw*i/(n-1)), Y=v=>padT+ih-(v/100)*ih;
+  const grid=[0,25,50,75,100].map(g=>'<line x1="'+padL+'" y1="'+Y(g)+'" x2="'+(W2-padR)+'" y2="'+Y(g)+'" stroke="var(--line)"/><text x="'+(padL-5)+'" y="'+(Y(g)+3)+'" font-size="8" fill="var(--faint)" text-anchor="end">'+g+'</text>').join('');
+  const line=(key,col,dash)=>{
+    let d='',started=false;
+    rows.forEach((r,i)=>{if(r[key]==null){started=false;return}d+=(started?'L':'M')+X(i).toFixed(1)+' '+Y(r[key]).toFixed(1)+' ';started=true});
+    if(!d)return '';
+    const pts=rows.map((r,i)=>r[key]==null?'':'<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(r[key]).toFixed(1)+'" r="2.4" fill="'+col+'"/>').join('');
+    return '<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="2.2"'+(dash?' stroke-dasharray="5 4"':'')+' stroke-linejoin="round" stroke-linecap="round"/>'+pts;
+  };
+  const xl=rows.map((r,i)=>{if(n>8&&i%Math.ceil(n/7)!==0&&i!==n-1)return '';const p=r.date.split('-');return '<text x="'+X(i).toFixed(1)+'" y="'+(H-6)+'" font-size="8" fill="var(--faint)" text-anchor="middle">'+(+p[2])+'/'+(+p[1])+'</text>'}).join('');
+  return '<svg viewBox="0 0 '+W2+' '+H+'" style="width:100%;display:block">'+grid+xl+line('f1','var(--polar)')+line('f3','var(--ref)',true)+line('f2','var(--whoop)')+'</svg>';
+}
+
+/* ===================== RENDER ===================== */
+function renderComp(){
+  const rows=buildSeries();
+  document.getElementById('chart').innerHTML=chart(rows);
+  const pAlgo=pairsOf(rows,'f2','f3'), pSensor=pairsOf(rows,'f1','f2'), pE2E=pairsOf(rows,'f1','f3'), pHrv=pairsOf(rows,'hrvP','hrvW');
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+  set('rAlgo',fmtR(pearson(pAlgo)));set('mAlgo',fmtM(mae(pAlgo)));
+  set('rSensor',fmtR(pearson(pSensor)));set('mSensor',fmtM(mae(pSensor)));
+  set('rE2E',fmtR(pearson(pE2E)));set('mE2E',fmtM(mae(pE2E)));
+  set('rHrv',fmtR(pearson(pHrv)));set('mHrv',fmtM(mae(pHrv)));
+  set('nDays',pSensor.length);
+  // interpretation
+  const ra=pearson(pAlgo),rs=pearson(pSensor);
+  let txt='Charge des données pour voir l\'analyse.';
+  if(ra!=null){
+    txt='<b>Fidélité algo r='+ra.toFixed(2)+'</b> : ton algo '+(ra>=0.9?'colle très bien':ra>=0.75?'suit correctement':'diverge encore')+' du Whoop officiel sur capteur identique. ';
+    if(rs!=null)txt+='<b>Écart capteur r='+rs.toFixed(2)+'</b> : '+(rs>=0.85?'Polar et Whoop sont très cohérents':'le capteur Polar diffère sensiblement de Whoop')+' à algo constant.';
+  }
+  document.getElementById('interp').innerHTML=txt;
+  // table
+  const t=document.getElementById('tbl');
+  let h='<tr><th>Jour</th><th>F1 Polar</th><th>F2 Whoop</th><th>F3 off.</th><th>HRV P</th><th>HRV W</th></tr>';
+  rows.slice().reverse().forEach(r=>{h+='<tr><td>'+r.date.slice(5)+'</td><td style="color:var(--polar)">'+(r.f1??'—')+'</td><td style="color:var(--whoop)">'+(r.f2??'—')+'</td><td>'+(r.f3??'—')+'</td><td>'+(r.hrvP??'—')+'</td><td>'+(r.hrvW??'—')+'</td></tr>'});
+  t.innerHTML=h;
+}
+function renderCounts(){
+  const c=(s)=>Object.keys(daysOf(s)).length;
+  document.getElementById('cntPolar').textContent=c('polar');
+  document.getElementById('cntWhoop').textContent=c('whoop');
+  const w=daysOf('whoop');document.getElementById('cntRef').textContent=Object.values(w).filter(x=>x&&x.offRecovery!=null).length;
+}
+const SLIDERS=[['wHRV','Poids HRV',0,1,0.01],['wRHR','Poids FC repos',0,1,0.01],['wSleep','Poids sommeil',0,1,0.01],['wResp','Poids respiration',0,0.5,0.01],['k','Pente (k)',0.4,2,0.05],['need','Besoin sommeil (h)',5,10,0.5]];
+function renderCalib(){
+  const w=W();
+  document.getElementById('sliders').innerHTML=SLIDERS.map(s=>{
+    const v=w[s[0]];
+    return '<div class="slrow"><span class="sn">'+s[1]+'</span><input type="range" min="'+s[2]+'" max="'+s[3]+'" step="'+s[4]+'" value="'+v+'" oninput="setW(\''+s[0]+'\',this.value)"><span class="sv2" id="sv_'+s[0]+'">'+(+v).toFixed(2)+'</span></div>';
+  }).join('');
+  const rows=buildSeries(),p=pairsOf(rows,'f2','f3');
+  document.getElementById('cR').textContent=fmtR(pearson(p));
+  const m=mae(p);document.getElementById('cM').textContent=m==null?'—':m.toFixed(1);
+}
+function setW(k,v){const w=W();w[k]=+v;jset('fa_weights',w);document.getElementById('sv_'+k).textContent=(+v).toFixed(2);
+  const rows=buildSeries(),p=pairsOf(rows,'f2','f3');document.getElementById('cR').textContent=fmtR(pearson(p));const m=mae(p);document.getElementById('cM').textContent=m==null?'—':m.toFixed(1);}
+function resetWeights(){jset('fa_weights',{});renderCalib();toast('Poids réinitialisés');}
+
+/* ===================== IMPORT / DATA ===================== */
+function storeNight(src,date,obj){jset('fa_'+src+'_'+norm(date),obj)}
+function importWhoop(input){const f=input.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{
+  let arr=JSON.parse(r.result);if(arr.days)arr=arr.days;if(!Array.isArray(arr))throw 0;let n=0;
+  arr.forEach(d=>{if(!d.date||d.hrv==null)return;const o={hrv:d.hrv,rhr:d.rhr??null,resp:d.resp??null,sleepMin:d.sleepMin??null,deep:d.deep??null,rem:d.rem??null,light:d.light??null,awake:d.awake??null,spo2:d.spo2??null,skinTemp:d.skinTemp??null,offRecovery:d.offRecovery??null,offStrain:d.offStrain??null,source:'whoop'};storeNight('whoop',d.date,o);n++});
+  toast(n+' nuits Whoop importées');refreshAll();
+}catch(e){toast('Fichier Whoop invalide')}};r.readAsText(f);input.value='';}
+function ingestPolarDump(txt){
+  let obj;try{obj=JSON.parse(txt)}catch(e){toast('JSON invalide');return}
+  let n=0;
+  // base FLINT export = {localStorageKey: rawJSONStringValue}
+  Object.keys(obj).forEach(k=>{
+    const m=k.match(/^sensor_(\d{4}-\d{1,2}-\d{1,2})$/);if(!m)return;
+    let s;try{s=typeof obj[k]==='string'?JSON.parse(obj[k]):obj[k]}catch(e){return}
+    if(!s||s.hrv==null)return;
+    storeNight('polar',m[1],{hrv:s.hrv,rhr:s.rhr??null,resp:s.resp??null,sleepMin:s.sleepMin??null,deep:s.deep??null,rem:s.rem??null,light:s.light??null,awake:s.awake??null,spo2:s.spo2??null,skinTemp:s.skinTemp??null,source:'polar'});n++;
+  });
+  // also accept a plain array [{date,hrv,...}]
+  if(n===0&&Array.isArray(obj)){obj.forEach(d=>{if(d.date&&d.hrv!=null){storeNight('polar',d.date,Object.assign({source:'polar'},d));n++}});}
+  if(n){toast(n+' nuits Polar importées');refreshAll()}else toast('Aucune nuit trouvée');
+}
+function importPolarFile(input){const f=input.files[0];if(!f)return;const r=new FileReader();r.onload=()=>ingestPolarDump(r.result);r.readAsText(f);input.value='';}
+function importPolarPaste(){const t=document.getElementById('pasteBox').value.trim();if(!t){toast('Colle d\'abord le JSON');return}ingestPolarDump(t);document.getElementById('pasteBox').value='';}
+function toggleOff(){document.getElementById('offBox').style.display=document.getElementById('mSrc').value==='whoop'?'grid':'none';}
+function saveManual(){
+  const g=id=>{const v=document.getElementById(id).value;return v===''?null:+v};
+  const date=document.getElementById('mDate').value;if(!date){toast('Choisis une date');return}
+  const hrv=g('mHrvIn');if(hrv==null){toast('Saisis au moins la HRV');return}
+  const src=document.getElementById('mSrc').value;
+  const sl=g('mSleep');
+  const o={hrv,rhr:g('mRhr'),resp:g('mResp'),sleepMin:sl!=null?Math.round(sl*60):null,source:src};
+  if(src==='whoop'){o.offRecovery=g('mOffRec');o.offStrain=g('mOffStr');}
+  storeNight(src,date,o);toast('Nuit enregistrée ('+src+')');refreshAll();
+}
+function exportCSV(){
+  const rows=buildSeries();if(!rows.length){toast('Rien à exporter');return}
+  let csv='date,flint_polar,flint_whoop,whoop_officiel,hrv_polar,hrv_whoop\n';
+  rows.forEach(r=>{csv+=[r.date,r.f1??'',r.f2??'',r.f3??'',r.hrvP??'',r.hrvW??''].join(',')+'\n'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='flint-analyse.csv';a.click();toast('CSV exporté');
+}
+function wipe(){if(!confirm('Vider toutes les données de FLINT Analyse ?'))return;
+  const ks=[];for(let i=0;i<LS.length;i++){const k=LS.key(i);if(k.startsWith('fa_'))ks.push(k)}ks.forEach(k=>LS.removeItem(k));refreshAll();toast('Vidé');}
+
+function loadDemo(){
+  // 21 jours, 2 capteurs corrélés + recovery Whoop officiel corrélé
+  const today=new Date();let n=0;
+  for(let i=20;i>=0;i--){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    const key=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+    const wave=Math.sin(i/2.4)+Math.sin(i/5.0)*0.6;            // état latent
+    const noiseW=(Math.random()-0.5)*5, noiseP=(Math.random()-0.5)*7;
+    const hrvW=Math.round(52+wave*16+noiseW);
+    const hrvP=Math.round(hrvW*0.9+6+noiseP);                  // offset capteur
+    const rhrW=Math.round(56-wave*4+(Math.random()-0.5)*3);
+    const rhrP=Math.round(rhrW+2+(Math.random()-0.5)*3);
+    const resp=Math.round((14.5-wave*0.6)*10)/10;
+    const sleepMin=Math.round(420+wave*30+(Math.random()-0.5)*40);
+    const offRec=Math.max(5,Math.min(99,Math.round((hrvW-30)*2.1+wave*6+50-rhrW*0.4+(Math.random()-0.5)*8)));
+    const offStr=Math.round((8+Math.random()*9)*10)/10;
+    storeNight('whoop',key,{hrv:hrvW,rhr:rhrW,resp,sleepMin,offRecovery:offRec,offStrain:offStr,source:'whoop'});
+    storeNight('polar',key,{hrv:hrvP,rhr:rhrP,resp:resp+ (Math.random()-0.5)*0.4,sleepMin:sleepMin+Math.round((Math.random()-0.5)*30),source:'polar'});
+    n++;
+  }
+  toast('Démo chargée ('+n+' jours)');refreshAll();
+}
+
+function refreshAll(){renderCounts();renderComp();renderCalib();}
+
+/* ===================== NAV ===================== */
+function go(v){document.querySelectorAll('.view').forEach(s=>s.classList.remove('on'));document.getElementById('v-'+v).classList.add('on');
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));window.scrollTo(0,0);}
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>go(b.dataset.v)));
+
+/* ===================== INIT ===================== */
+(function init(){
+  const t=new Date();document.getElementById('mDate').value=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+  refreshAll();
+  if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
+})();
+</script>
+</body>
+</html>
